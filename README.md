@@ -32,7 +32,10 @@ in the Fleetwright repository. This file is the setup.
 
 ```
 default.json                        a Renovate preset other repositories extend
-.claude/skills/<name>/SKILL.md      one skill, the way Claude Code reads one
+.claude/skills/antislop*/           six vendored skills: rules for interfaces that do not look generated
+.claude/skills/security-audit/      Cloudflare's security-audit skill, vendored
+.claude/skills/test-audit/          a test authoring gate and audit workflow, adapted from openclaw's
+.claude/skills/adopt-renovate-preset/   one skill of our own, the way Claude Code reads one
 .claude/agents/<name>.md            one subagent
 .claude/commands/<name>.md          one slash command
 .claude/settings.json               shared settings only: no credentials, nothing machine-specific
@@ -100,6 +103,23 @@ rather than replacing a file that may hold your model choice and permissions.
 project's `.claude/` as the destination, which affects that project only. The
 `/vendor-templates owner/repo` command in `.claude/commands` does exactly this,
 asking before it replaces a file that differs.
+
+**The vendored skills.** Three sets, each under a licence that allows the
+copy, each **pinned to a commit and brought up to date by a person reading
+the diff**, never fetched by an agent at session start. An agent that pulls
+its own rules from the network is an agent whose rules changed with nobody
+reviewing the change.
+
+| skills | from | pinned at | what they are for |
+|---|---|---|---|
+| `antislop`, `-ui`, `-copywriting`, `-human`, `-layoutmobile`, `-code` | [miqdadbadjuber/anti-slop](https://github.com/miqdadbadjuber/anti-slop) (MIT) | release 3.2.21, `439a2ef`; `antislop/VENDORED.md` | keeping generated interfaces, copy and comments from looking generated. The core loads always; the others by task. It expects a `DESIGN.md` for direction, and that is a fact about one product, so none is here |
+| `security-audit` | [cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill) (MIT) | `c1c8a8c`; `security-audit/VENDORED.md` | guidance for a focused security question, and a six-phase audit with independent verification when one is asked for by name. Its validators run with `node` alone |
+| `test-audit` | [openclaw/openclaw](https://github.com/openclaw/openclaw) `.agents/skills/test-audit` (MIT), adapted | the note at the top of its `SKILL.md` | the four questions every new test answers before it is written, and sweeps of tests that re-assert source or pin an implementation. Read `CAMPAIGN.md` before pruning a whole subsystem's tests |
+
+Each `VENDORED.md` says how to update: copy the upstream directory over this
+one, keep `LICENSE` and the note, change the commit, and read the diff like
+any other code. `antislop-human/SKILL.md` carries one local change, recorded
+there, and it has to be re-applied on every update.
 
 **`.github`.** Copy the issue forms and the pull request template into a
 repository's `.github/`. `check.yml` is this repository's own: it runs only
