@@ -1,9 +1,15 @@
 # Fleetwright templates
 
-A template for the repository a Fleetwright session reads when somebody asks it
+A starter for the repository a Fleetwright session reads when somebody asks it
 to adopt a preset, install a skill or reuse a workflow. Make your own from it,
 link it, and what it holds is one `git clone` away from every session you
 start, with nothing pasted.
+
+**A template to start from, not a repository to fork, on purpose.** A fork of
+a public repository stays public and stays tied to this one; a repository made
+with **Use this template** is yours outright, with its own history, and may be
+**private** from its first commit. A templates repository is where skills that
+name internal systems end up, so that choice has to be open.
 
 The design and the reasoning are in [`docs/linked-repos.md`](https://github.com/TheTechNetwork/Fleetwright/blob/main/docs/linked-repos.md#templates-and-the-bound-that-did-not-move)
 in the Fleetwright repository. This file is the setup.
@@ -11,7 +17,9 @@ in the Fleetwright repository. This file is the setup.
 ## Make yours
 
 1. **Use this template**, at the top of this page, then **Create a new
-   repository**. Public or private, your call ([which](#public-or-private)).
+   repository**. Public or private, your call ([which](#public-or-private)):
+   a template copy may be private where a fork may not, which is why this is
+   a template.
 2. Install the Fleetwright GitHub App on the repository's owner and select the
    repository. Contents **read** is all a templates repository needs, and it is
    in what the App asks for.
