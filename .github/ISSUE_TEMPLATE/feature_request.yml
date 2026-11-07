@@ -1,0 +1,24 @@
+name: Something that belongs in here
+description: A skill, agent, command, preset rule or community file that every repository made from this one should carry.
+labels: [enhancement]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of thing
+      options:
+        - A Claude Code skill (.claude/skills)
+        - A subagent (.claude/agents)
+        - A slash command (.claude/commands)
+        - A shared setting (.claude/settings.json)
+        - A Renovate rule (default.json)
+        - A community file (.github)
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What it would do, and why every copy should have it
+      description: A thing one project needs belongs in that project. This repository is for what they all need.
+    validations:
+      required: true

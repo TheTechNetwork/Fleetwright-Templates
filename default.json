@@ -1,0 +1,66 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": [
+    "A shared Renovate preset. Extend it from another repository with",
+    "{\"extends\": [\"github>TheTechNetwork/Fleetwright-Templates-Template\"]}.",
+    "",
+    "It carries the POLICY from Fleetwright's own renovate.json and none of the",
+    "facts about that one project: no package names, no paths, no managers that",
+    "read a file only Fleetwright has. Four rules.",
+    "",
+    "PIN EVERYTHING; NO RANGES. rangeStrategy: pin, so a manifest names an exact",
+    "version and every change to what runs is a diff somebody can read. A caret",
+    "hides the update inside the lock file.",
+    "",
+    "LET A RELEASE SOAK. minimumReleaseAge holds an update back for three days",
+    "before it is proposed. Not for stability, which CI answers in minutes, but",
+    "for the supply chain: a malicious version is usually found and pulled within",
+    "hours to a couple of days, and three days is somebody else finding it first.",
+    "",
+    "A SECURITY FIX STILL DOES NOT WAIT. vulnerabilityAlerts overrides the soak to",
+    "nothing, because there the known-bad version is the one already installed.",
+    "",
+    "STAY ON LATEST OTHERWISE. Majors are proposed like anything else; holding",
+    "them for review buys safety CI already provides and pays for it in a",
+    "backlog. GitHub Actions patch and minor updates are grouped and automerged,",
+    "because every workflow run covers them and a break is one click to revert."
+  ],
+  "extends": ["config:recommended"],
+  "timezone": "America/Chicago",
+  "prConcurrentLimit": 10,
+  "prHourlyLimit": 4,
+  "rebaseWhen": "behind-base-branch",
+  "rangeStrategy": "pin",
+  "minimumReleaseAge": "3 days",
+  "internalChecksFilter": "strict",
+  "vulnerabilityAlerts": {
+    "description": "A security fix does not wait for anything, the soak included: the known-bad version is the one already installed.",
+    "minimumReleaseAge": null,
+    "schedule": ["at any time"]
+  },
+  "packageRules": [
+    {
+      "description": "Actions are grouped and automerged on patch/minor: every workflow run covers them, so a break is visible immediately and revertible in one click.",
+      "groupName": "github actions",
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true
+    },
+    {
+      "description": "package.json's engines floor is a compatibility claim about what the code needs, not a statement about what CI runs. Renovate moves the runner; a person moves the claim.",
+      "matchDepTypes": ["engines"],
+      "enabled": false
+    }
+  ],
+  "customManagers": [
+    {
+      "description": "The Node every workflow sets up, `node-version:` under actions/setup-node. The github-actions manager reads `uses:` and not an action's inputs, so an exact version written there would otherwise never move. Exact versions only: a bare major in a matrix is a person's choice of which lines to test.",
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/[^/]+\\.ya?ml$/"],
+      "matchStrings": ["node-version: '(?<currentValue>\\d+\\.\\d+\\.\\d+)'"],
+      "datasourceTemplate": "node-version",
+      "depNameTemplate": "node",
+      "versioningTemplate": "node"
+    }
+  ]
+}

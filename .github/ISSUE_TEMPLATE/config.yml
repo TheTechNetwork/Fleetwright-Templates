@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Fleetwright itself
+    url: https://github.com/TheTechNetwork/Fleetwright/issues
+    about: Anything about linking, the check, or what a session does with a templates repository belongs there, not here.

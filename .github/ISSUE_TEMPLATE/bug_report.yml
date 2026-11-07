@@ -1,0 +1,25 @@
+name: Something in here is wrong
+description: A preset, skill, agent, command or workflow in this repository does not do what its text says.
+labels: [bug]
+body:
+  - type: input
+    id: file
+    attributes:
+      label: Which file
+      placeholder: .claude/skills/adopt-renovate-preset/SKILL.md
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What it says it does
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened instead
+      description: Paste the output, not a description of it.
+      render: text
+    validations:
+      required: true

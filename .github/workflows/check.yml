@@ -1,0 +1,66 @@
+# What this repository carries, checked before anybody copies it: the Renovate
+# preset and the config that extends it through Renovate's own validator, the
+# workflow through Fleetwright's own checker, and the .claude directory for the
+# shape Claude Code reads. With Fleetwright's checker, not a copy of it, because
+# a copied checker is a different checker (scripts/check-workflows.mjs in
+# TheTechNetwork/Fleetwright says why).
+#
+# Nothing here runs on a fleet machine. A templates repository is read by a
+# session when somebody asks it to read it, and this is the check that what it
+# reads is well-formed.
+name: check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  templates:
+    # HERE ONLY. A repository made from this template gets this file too, and
+    # has no reason to spend a run on it.
+    if: github.repository == 'TheTechNetwork/Fleetwright-Templates-Template'
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/checkout@v7.0.1
+        with:
+          repository: TheTechNetwork/Fleetwright
+          path: .fleetwright
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '26.13.0'
+      - name: Install the workflow checker's one dependency
+        run: npm --prefix .fleetwright ci --ignore-scripts --no-audit --no-fund
+      - name: Check this workflow
+        run: node .fleetwright/scripts/check-workflows.mjs .github/workflows
+
+      # NO FILE ARGUMENT, deliberately, and the preset checked as a repository
+      # config. Given a path, the validator treats the file as SELF-HOSTED
+      # GLOBAL config, which is a different schema that accepts options a
+      # repository config must reject. With no argument it finds renovate.json
+      # itself and checks it as what it is. default.json is not one of the
+      # names it looks for, so it is checked the same way under that name, in
+      # a directory of its own.
+      #
+      # PINNED, so the run says which Renovate judged it, and so a Renovate
+      # release that will not install does not turn every change here red.
+      # Renovate itself moves the pin, through the preset this repository
+      # extends and the regex manager below.
+      - name: Renovate preset and config are valid
+        env:
+          # renovate: datasource=npm depName=renovate
+          RENOVATE_VERSION: '44.216.0'
+        run: |
+          npx --yes --package "renovate@$RENOVATE_VERSION" -- renovate-config-validator --version
+          npx --yes --package "renovate@$RENOVATE_VERSION" -- renovate-config-validator --strict
+          preset="$(mktemp -d)"
+          cp default.json "$preset/renovate.json"
+          cd "$preset"
+          npx --yes --package "renovate@$RENOVATE_VERSION" -- renovate-config-validator --strict
+
+      - name: The .claude directory has the shape Claude Code reads
+        run: node .github/scripts/check-dot-claude.mjs

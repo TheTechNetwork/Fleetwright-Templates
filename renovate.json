@@ -1,0 +1,9 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": [
+    "This repository extends its own preset, so default.json is exercised here",
+    "before anybody else extends it. A copy made from the template should point",
+    "this at its own owner, or keep following this one: both work."
+  ],
+  "extends": ["github>TheTechNetwork/Fleetwright-Templates-Template"]
+}
