@@ -19,7 +19,7 @@ in the Fleetwright repository. This file is the setup.
    enter it and press **Check and save**. The check says whether it is public,
    that it is readable, and which of `.claude`, `.github` and `default.json`
    it carries.
-4. Put your own owner where this one says `TheTechNetwork/Fleetwright-Templates-Template`:
+4. Put your own owner where this one says `TheTechNetwork/Fleetwright-Templates`:
    `renovate.json` here, and the `extends` line [below](#the-renovate-preset).
 
 ```
@@ -45,7 +45,7 @@ A templates link is **stored, checked for readability and shown**. Nothing in
 it is turned into a task profile, typed into a session, or run. A session
 reads it when somebody asks it to, in words:
 
-> Clone TheTechNetwork/Fleetwright-Templates-Template and vendor its
+> Clone TheTechNetwork/Fleetwright-Templates and vendor its
 > `.claude/skills` into this project's `.claude/`.
 
 That is deliberate, and the reasoning is in the design document linked above:
@@ -63,7 +63,7 @@ broker mints a one-repository token for it.
 **The Renovate preset.** In another repository's `renovate.json`:
 
 ```json
-{ "extends": ["github>TheTechNetwork/Fleetwright-Templates-Template"] }
+{ "extends": ["github>TheTechNetwork/Fleetwright-Templates"] }
 ```
 
 It carries the policy from Fleetwright's own `renovate.json` and none of the
@@ -79,7 +79,7 @@ convention for keeping shared configuration in one place and pulling it in on
 purpose. Into `~/.claude`, which affects every project on that machine:
 
 ```sh
-git clone --depth 1 https://github.com/TheTechNetwork/Fleetwright-Templates-Template /tmp/templates
+git clone --depth 1 https://github.com/TheTechNetwork/Fleetwright-Templates /tmp/templates
 cp -R /tmp/templates/.claude/skills/.   ~/.claude/skills/
 cp -R /tmp/templates/.claude/agents/.   ~/.claude/agents/
 cp -R /tmp/templates/.claude/commands/. ~/.claude/commands/

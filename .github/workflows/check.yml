@@ -22,7 +22,7 @@ jobs:
   templates:
     # HERE ONLY. A repository made from this template gets this file too, and
     # has no reason to spend a run on it.
-    if: github.repository == 'TheTechNetwork/Fleetwright-Templates-Template'
+    if: github.repository == 'TheTechNetwork/Fleetwright-Templates'
     runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7.0.1

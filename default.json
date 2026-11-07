@@ -2,7 +2,7 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "description": [
     "A shared Renovate preset. Extend it from another repository with",
-    "{\"extends\": [\"github>TheTechNetwork/Fleetwright-Templates-Template\"]}.",
+    "{\"extends\": [\"github>TheTechNetwork/Fleetwright-Templates\"]}.",
     "",
     "It carries the POLICY from Fleetwright's own renovate.json and none of the",
     "facts about that one project: no package names, no paths, no managers that",
