@@ -64,3 +64,10 @@ jobs:
 
       - name: The .claude directory has the shape Claude Code reads
         run: node .github/scripts/check-dot-claude.mjs
+
+      # The script a copy runs to take what is new here, against two throwaway
+      # repositories: a template that moves and a copy made from it. It is the
+      # one thing in this repository that changes somebody else's, so it is
+      # the one thing here with a test.
+      - name: A copy can take what is new here, and keeps what is its own
+        run: bash .github/scripts/sync-template.test.sh

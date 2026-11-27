@@ -42,6 +42,9 @@ default.json                        a Renovate preset other repositories extend
 .claude/settings.json               shared settings only: no credentials, nothing machine-specific
 .github/ISSUE_TEMPLATE/, PULL_REQUEST_TEMPLATE.md
 .github/workflows/check.yml         checks all of the above; runs in this repository only
+.github/workflows/sync-template.yml a copy asks what is new here, weekly, and opens a pull request; runs in copies only
+.github/scripts/sync-template.sh    the merge that workflow does, and its test beside it
+.github/template-sync               in a copy, once it has synced: the commit of this repository it last took
 renovate.json                       this repository extending its own preset
 ```
 
@@ -147,7 +150,46 @@ you need both, make two and link the one sessions should read.
 
 ## Keeping it up to date
 
-GitHub does not update a repository made from a template. When this one
-changes, copy what changed into yours. Nothing in Fleetwright refuses an old
-copy: a templates repository is read, never dispatched into, so there is no
-422 here as there is for a runner repository.
+GitHub does not update a repository made from a template: a copy has this
+repository's files and none of its history, so there is nothing to pull.
+`.github/workflows/sync-template.yml` asks instead. In a copy it runs on
+Monday mornings and whenever you press **Run workflow** under **Actions ›
+sync from the template**, and when this repository has something yours does
+not, it opens a pull request in yours. It never pushes to your default
+branch: most of what is in here is instructions an agent follows, and a change
+to those is something a person reads first.
+
+It merges three ways, from the commit of this repository yours was made from
+(found from your first commit) or last synced to (written in
+`.github/template-sync`), so:
+
+- a line you changed and this repository did not stays yours: your owner in
+  `renovate.json`, your own skills, anything you added;
+- a line changed here and not by you comes in;
+- where both changed the same lines, **yours is kept** and the pull request
+  lists the file with a link to this repository's version, to take from by
+  hand. No file is ever left with conflict markers in it;
+- **no workflow is changed.** The token a workflow runs on may not push a
+  change to a workflow. One that changed here is listed in the pull request,
+  to copy by hand.
+
+Two things a copy may need to do once:
+
+1. **Let Actions open pull requests**: Settings › Actions › General › *Allow
+   GitHub Actions to create and approve pull requests*. Without it the branch
+   `template-sync` is still pushed, and the run's summary has the link that
+   opens the pull request.
+2. **If your copy was made before that workflow existed**, it does not have
+   it, and for the reason above no workflow can give it to you. Copy
+   `.github/workflows/sync-template.yml` and `.github/scripts/sync-template.sh`
+   across and commit them. After that the script keeps itself up to date,
+   being a file the sync is allowed to change.
+
+To follow a template other than this one, such as your organisation's own
+copy, set the repository variable `TEMPLATE_UPSTREAM` to its `owner/repo`. It
+has to be readable without a token, which today means public. To stop, delete
+the workflow.
+
+Nothing in Fleetwright refuses an old copy: a templates repository is read,
+never dispatched into, so there is no 422 here as there is for a runner
+repository.
