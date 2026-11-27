@@ -1,0 +1,123 @@
+# What the template has that a copy does not, as a pull request in the copy.
+#
+# A repository made with "Use this template" has the template's files and
+# none of its history, so nothing tells it the template moved. This asks,
+# once a week and whenever somebody presses Run workflow, and opens a pull
+# request with what is new. It never pushes to the default branch: what a
+# templates repository holds is mostly instructions an agent follows, and a
+# change to those is read by a person before it is in.
+#
+# The merge, what it keeps as yours and what it will not touch are in
+# .github/scripts/sync-template.sh, which says why for each.
+#
+# TWO THINGS A COPY MAY NEED TO DO ONCE.
+#
+#   Let Actions open pull requests: Settings, Actions, General, "Allow GitHub
+#   Actions to create and approve pull requests". Without it the branch is
+#   still pushed, and the run's summary has the link that opens the pull
+#   request by hand.
+#
+#   Follow a template other than this one: set the repository variable
+#   TEMPLATE_UPSTREAM to owner/repo, or type it when running by hand.
+#
+# A copy made before this file existed does not have it, and cannot be given
+# it by a workflow (see the script on workflows). Copy this file and
+# .github/scripts/sync-template.sh across once; after that the script keeps
+# itself up to date.
+name: sync from the template
+
+on:
+  workflow_dispatch:
+    inputs:
+      upstream:
+        description: The template to take from, as owner/repo. Empty means the usual one.
+        required: false
+        type: string
+  schedule:
+    # Monday morning, off the hour: the top of the hour is when everybody's
+    # schedules run and GitHub drops some of them.
+    - cron: '23 6 * * 1'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sync-template
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    # NOT IN THE TEMPLATE ITSELF, which has nothing to take from itself.
+    if: github.repository != (inputs.upstream || vars.TEMPLATE_UPSTREAM || 'TheTechNetwork/Fleetwright-Templates')
+    runs-on: ubuntu-26.04
+    steps:
+      # The whole history, because where this copy began is its first commit.
+      # The default branch whatever branch the run was started from: that is
+      # what a sync is a pull request against.
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+
+      - name: Merge what the template has
+        id: sync
+        env:
+          UPSTREAM: ${{ inputs.upstream || vars.TEMPLATE_UPSTREAM || 'TheTechNetwork/Fleetwright-Templates' }}
+        run: bash .github/scripts/sync-template.sh
+
+      - name: Push the branch and open the pull request
+        if: steps.sync.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMIT: ${{ steps.sync.outputs.commit }}
+          TITLE: ${{ steps.sync.outputs.title }}
+          BODY: ${{ steps.sync.outputs.body }}
+          INTO: ${{ github.event.repository.default_branch }}
+          REPO: ${{ github.repository }}
+          SERVER: ${{ github.server_url }}
+        run: |
+          set -eu
+          branch=template-sync
+
+          # THE SAME PULL REQUEST AS LAST WEEK is left alone. The branch is
+          # this workflow's own and is written over each time, and writing
+          # the same files over it would run the copy's checks again for
+          # nothing and tell everybody watching that something changed.
+          if git fetch --quiet --no-tags origin "refs/heads/$branch" 2> /dev/null; then
+            if [ "$(git rev-parse 'FETCH_HEAD^{tree}')" = "$(git rev-parse "$COMMIT^{tree}")" ] &&
+               [ "$(git rev-parse 'FETCH_HEAD^')" = "$(git rev-parse "$COMMIT^")" ]; then
+              echo "the pull request already has exactly this"
+              exit 0
+            fi
+          fi
+
+          git push --force origin "$COMMIT:refs/heads/$branch"
+
+          open="$(gh pr list --head "$branch" --state open --json number --jq '.[0].number // empty')"
+          if [ -n "$open" ]; then
+            gh pr edit "$open" --title "$TITLE" --body-file "$BODY"
+            echo "updated pull request #$open"
+          elif said="$(gh pr create --base "$INTO" --head "$branch" --title "$TITLE" --body-file "$BODY" 2>&1)"; then
+            echo "$said"
+          else
+            # Not a failure of the sync: the branch is there and holds it.
+            # GitHub's own words first, because the usual reason is a guess.
+            echo "$said"
+            echo "::warning::The branch $branch is pushed, but the pull request could not be opened. Most often the repository does not let Actions open pull requests (Settings, Actions, General). The link to open it by hand is in this run's summary."
+            {
+              echo "### The sync is on the branch \`$branch\`, with no pull request"
+              echo
+              echo "GitHub would not open one, and said:"
+              echo
+              echo '```'
+              echo "$said"
+              echo '```'
+              echo
+              echo "Open it here: $SERVER/$REPO/compare/$INTO...$branch?expand=1"
+              echo
+              echo "If it said Actions may not create pull requests: Settings, Actions, General, **Allow GitHub Actions to create and approve pull requests**, and the next run opens it for you."
+              echo
+              cat "$BODY"
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
