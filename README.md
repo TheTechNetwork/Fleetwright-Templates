@@ -36,6 +36,7 @@ default.json                        a Renovate preset other repositories extend
 .claude/skills/security-audit/      Cloudflare's security-audit skill, vendored
 .claude/skills/test-audit/          a test authoring gate and audit workflow, adapted from openclaw's
 .claude/skills/adopt-renovate-preset/   one skill of our own, the way Claude Code reads one
+.claude/skills/full-audit/          a full code and design audit in stages, one sub-agent to a lane; ours
 .claude/agents/<name>.md            one subagent
 .claude/commands/<name>.md          one slash command
 .claude/settings.json               shared settings only: no credentials, nothing machine-specific
@@ -120,6 +121,17 @@ Each `VENDORED.md` says how to update: copy the upstream directory over this
 one, keep `LICENSE` and the note, change the commit, and read the diff like
 any other code. `antislop-human/SKILL.md` carries one local change, recorded
 there, and it has to be re-applied on every update.
+
+**`full-audit`, which is ours.** A full code and design audit in stages,
+staged the way `security-audit` is: map the repository, review with one
+sub-agent to a lane, check every finding before it is passed on, report, and
+only when asked, fix one layer to a pull request and review the fixes. It was
+written in Fleetwright from the reviews that repository had, and it leans on
+the two sets above (`test-audit` for what a test proves, the antislop skills
+for the design lane). `SKILL.md`, `COMMON.md` and `LANES.md` name no project;
+`EXAMPLE-FLEETWRIGHT.md` is Fleetwright's own lanes with what each found, there
+to show what a filled-in lane looks like. In a copy, put your own layers and
+your own rules where the lanes and `COMMON.md` leave a blank.
 
 **`.github`.** Copy the issue forms and the pull request template into a
 repository's `.github/`. `check.yml` is this repository's own: it runs only
